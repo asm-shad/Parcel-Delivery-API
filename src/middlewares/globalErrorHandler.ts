@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../config/env";
-// import AppError from "../errorHelpers/AppError";
+import AppError from "../errorHelpers/AppError";
 import { TErrorSources } from "../interfaces/error.types";
 import { handleDuplicateError } from "../helpers/handleDuplicateError";
 import { handleCastError } from "../helpers/handleCastError";
@@ -54,11 +54,11 @@ export const globalErrorHandler = (
     message = simplifiedError.message;
     errorSources = simplifiedError.errorSources ?? [];
   }
-  // Handle custom application-defined errors
-  //   else if (err instanceof AppError) {
-  //     statusCode = err.statusCode;
-  //     message = err.message;
-  //   }
+  //   Handle custom application-defined errors
+  else if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+  }
   // Handle all other built-in JavaScript errors
   else if (err instanceof Error) {
     statusCode = 500;
