@@ -4,6 +4,7 @@ import express, { Request, Response } from "express";
 // import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./middlewares/notFound";
 import cookieParser from "cookie-parser";
+import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.get("/", (req: Request, res: Response) => {
     message: "Welcome to Parcel Delivery API",
   });
 });
+
+app.use(globalErrorHandler);
 
 // direct function we didn't do any route matching, same as globalErrorHandler
 app.use(notFound);
