@@ -97,7 +97,7 @@ const parcelSchema = new Schema<IParcel>(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 export default model<IParcel>("Parcel", parcelSchema);

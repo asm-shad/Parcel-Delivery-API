@@ -16,15 +16,15 @@ const UserSchema = new Schema<IUser>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String },
     role: {
       type: String,
       enum: Object.values(UserRole),
       default: UserRole.Sender,
     },
-    phone: { type: String, required: true },
+    phone: { type: String },
     picture: { type: String },
-    address: { type: String, required: true },
+    address: { type: String },
     status: {
       type: String,
       enum: Object.values(UserStatus),
@@ -34,12 +34,12 @@ const UserSchema = new Schema<IUser>(
     isVerified: { type: Boolean, default: false },
     auths: {
       type: [authProviderSchema],
-      default: [],
     },
   },
   {
     timestamps: true,
+    versionKey: false,
   }
 );
 
-export const UserModel = model<IUser>("User", UserSchema);
+export const User = model<IUser>("User", UserSchema);
