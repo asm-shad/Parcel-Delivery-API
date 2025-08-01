@@ -4,6 +4,7 @@ import { validateRequest } from "../../middlewares/validateRequest";
 import { createUserZodSchema } from "./user.validation";
 import { checkAuth } from "../auth/checkAuth";
 import { UserRole } from "./user.interface";
+import { AuthControllers } from "../auth/auth.controller";
 
 const router = Router();
 
@@ -16,6 +17,11 @@ router.get(
   "/all-users",
   checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   UserControllers.getAllUsers
+);
+router.patch(
+  ":id",
+  checkAuth(...Object.values(UserRole)),
+  UserControllers.updateUser
 );
 
 export const UserRoutes = router;
