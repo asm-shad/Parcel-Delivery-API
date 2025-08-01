@@ -24,10 +24,10 @@ export const createUserZodSchema = z.object({
     })
     .regex(/^(?=.*\d)/, {
       message: "Password must contain at least 1 number.",
-    })
-    .optional(), // optional for users who register via social login
+    }),
+  // .optional(), // optional for users who register via social login
 
-  role: z.enum([UserRole.Admin, UserRole.Sender, UserRole.Receiver]).optional(),
+  role: z.enum(Object.values(UserRole) as [string]).optional(),
 
   phone: z
     .string({ invalid_type_error: "Phone must be a string" })
