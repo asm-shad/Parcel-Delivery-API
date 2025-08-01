@@ -1,5 +1,5 @@
 import z from "zod";
-import { UserRole, UserStatus } from "./user.interface";
+import { IsActive, UserRole } from "./user.interface";
 
 export const createUserZodSchema = z.object({
   name: z
@@ -77,7 +77,7 @@ export const updateUserZodSchema = z.object({
     .string({ invalid_type_error: "Address must be string" })
     .max(200, { message: "Address cannot exceed 200 characters." })
     .optional(),
-  status: z.enum(Object.values(UserStatus) as [string]).optional(),
+  IsActive: z.enum(Object.values(IsActive) as [string]).optional(),
   isDeleted: z
     .boolean({ invalid_type_error: "isDeleted must be true or false" })
     .optional(),

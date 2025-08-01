@@ -5,9 +5,10 @@ export enum UserRole {
   RECIEVER = "RECIEVER",
 }
 
-export enum UserStatus {
-  Active = "active",
-  Blocked = "blocked",
+export enum IsActive {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  BLOCKED = "BLOCKED",
 }
 
 export interface IAuthProvider {
@@ -24,7 +25,7 @@ export interface IUser {
   phone?: string;
   picture?: string;
   address?: string;
-  status?: UserStatus;
+  isActive?: IsActive;
   isDeleted?: boolean;
   isVerified?: boolean;
   auths?: IAuthProvider[];

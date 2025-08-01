@@ -2,6 +2,8 @@ import { Router } from "express";
 import { UserControllers } from "./user.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { createUserZodSchema } from "./user.validation";
+import { checkAuth } from "../auth/checkAuth";
+import { UserRole } from "./user.interface";
 
 const router = Router();
 
@@ -12,7 +14,7 @@ router.post(
 );
 router.get(
   "/all-users",
-  validateRequest(createUserZodSchema),
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   UserControllers.getAllUsers
 );
 

@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { IAuthProvider, IUser, UserRole, UserStatus } from "./user.interface";
+import { IAuthProvider, IsActive, IUser, UserRole } from "./user.interface";
 
 const authProviderSchema = new Schema<IAuthProvider>(
   {
@@ -25,10 +25,10 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String },
     picture: { type: String },
     address: { type: String },
-    status: {
+    isActive: {
       type: String,
-      enum: Object.values(UserStatus),
-      default: UserStatus.Active,
+      enum: Object.values(IsActive),
+      default: IsActive.ACTIVE,
     },
     isDeleted: { type: Boolean, default: false },
     isVerified: { type: Boolean, default: false },
