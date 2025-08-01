@@ -2,6 +2,7 @@ import { Server } from "http";
 import mongoose from "mongoose";
 import { envVars } from "./config/env";
 import app from "./app";
+import { seedSuperAdmin } from "./utils/seedSuperAdmin";
 
 let server: Server;
 
@@ -18,7 +19,11 @@ const startServer = async () => {
   }
 };
 
-startServer();
+(async () => {
+  await startServer();
+  // When server runs if super admin doesn't exist in db a super admin created by itself
+  await seedSuperAdmin();
+})();
 
 // unhandled rejection error
 process.on("unhandledRejection", (err) => {
