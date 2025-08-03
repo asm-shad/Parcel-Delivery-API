@@ -1,5 +1,5 @@
 import AppError from "../../errorHelpers/AppError";
-import { IAuthProvider, IUser, UserRole } from "./user.interface";
+import { IAuthProvider, IsActive, IUser, UserRole } from "./user.interface";
 import { User } from "./user.model";
 import httpStatus from "http-status-codes";
 import bcryptjs from "bcryptjs";
@@ -98,8 +98,65 @@ const getAllUsers = async () => {
   };
 };
 
+const updateUserStatus = async (userId: string, status: IsActive) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  // Status transition validation
+  if (user.isActive === IsActive.ACTIVE && status !== IsActive.BLOCKED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Active user can only be blocked"
+    );
+  }
+
+  if (
+    (user.isActive === IsActive.INACTIVE ||
+      user.isActive === IsActive.BLOCKED) &&
+    status !== IsActive.ACTIVE
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Inactive/Blocked user can only be activated"
+    );
+  }
+
+  user.isActive = status;
+  await user.save();
+
+  return user;
+};
+
+const getSingleUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+  return user;
+};
+
+const deleteUser = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { isDeleted: true },
+    { new: true, runValidators: true }
+  );
+
+  return updatedUser;
+};
+
 export const UserServices = {
   createUser,
   getAllUsers,
   updateUser,
+  updateUserStatus,
+  getSingleUser,
+  deleteUser,
 };

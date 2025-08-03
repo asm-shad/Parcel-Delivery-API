@@ -24,4 +24,22 @@ router.patch(
   UserControllers.updateUser
 );
 
+router.patch(
+  "/status/:id",
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  UserControllers.updateUserStatus
+);
+
+router.get(
+  "/:id",
+  checkAuth(...Object.values(UserRole)),
+  UserControllers.getSingleUser
+);
+
+router.delete(
+  "/:id",
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  UserControllers.deleteUser
+);
+
 export const UserRoutes = router;
