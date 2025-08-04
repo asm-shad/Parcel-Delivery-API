@@ -29,8 +29,6 @@ export const createParcelZodSchema = z.object({
     .number({ invalid_type_error: "Fee must be a number" })
     .positive({ message: "Fee must be a positive number." }),
 
-  sender: z.string({ invalid_type_error: "Sender ID must be a string" }),
-
   receiver: z.string({ invalid_type_error: "Receiver ID must be a string" }),
 
   senderAddress: z
