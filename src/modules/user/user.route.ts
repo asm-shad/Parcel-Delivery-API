@@ -2,7 +2,7 @@ import { Router } from "express";
 import { UserControllers } from "./user.controller";
 import { validateRequest } from "../../middlewares/validateRequest";
 import { createUserZodSchema, updateUserZodSchema } from "./user.validation";
-import { checkAuth } from "../auth/checkAuth";
+import { checkAuth } from "../../middlewares/checkAuth";
 import { UserRole } from "./user.interface";
 
 const router = Router();

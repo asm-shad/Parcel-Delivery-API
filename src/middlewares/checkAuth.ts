@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import httpStatus from "http-status-codes";
-import { IsActive } from "../user/user.interface";
-import { User } from "../user/user.model";
-import { envVars } from "../../config/env";
-import AppError from "../../errorHelpers/AppError";
-import { verifyToken } from "../../utils/jwt";
+import { IsActive } from "../modules/user/user.interface";
+import { User } from "../modules/user/user.model";
+import { envVars } from "../config/env";
+import AppError from "../errorHelpers/AppError";
+import { verifyToken } from "../utils/jwt";
 
 export const checkAuth =
   (...authRoles: string[]) =>
@@ -23,9 +23,13 @@ export const checkAuth =
       ) as JwtPayload;
       // const verifiedToken = jwt.verify(accessToken, "secret");
 
+      // const isUserExist = await User.findOne({
+      //   email: verifiedToken.email,
+      // });
+
       const isUserExist = await User.findOne({
         email: verifiedToken.email,
-      });
+      }).select("+role");
 
       if (!isUserExist) {
         throw new AppError(httpStatus.BAD_REQUEST, "User doesn't exist!");
@@ -50,7 +54,7 @@ export const checkAuth =
       }
 
       req.user = verifiedToken;
-      // console.log(verifiedToken);
+      console.log(verifiedToken);
 
       next();
     } catch (err) {

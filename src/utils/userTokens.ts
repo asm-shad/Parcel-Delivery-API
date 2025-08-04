@@ -13,9 +13,6 @@ export const createUserTokens = (user: Partial<IUser>) => {
     role: user.role,
   };
 
-  // const accessToken = jwt.sign(jwtPayload, "secret", {
-  //   expiresIn: "5d",
-  // });
   const accessToken = generateToken(
     jwtPayload,
     envVars.JWT_ACCESS_SECRET,

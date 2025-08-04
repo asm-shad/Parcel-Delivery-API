@@ -48,7 +48,7 @@ const updateUser = async (
   if (payload.role) {
     if (
       decodedToken.role === UserRole.SENDER ||
-      decodedToken.role === UserRole.RECIEVER
+      decodedToken.role === UserRole.RECEIVER
     ) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
@@ -63,7 +63,7 @@ const updateUser = async (
   if (payload.isActive || payload.isDeleted || payload.isVerified) {
     if (
       decodedToken.role === UserRole.SENDER ||
-      decodedToken.role === UserRole.RECIEVER
+      decodedToken.role === UserRole.RECEIVER
     ) {
       throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
     }
@@ -87,8 +87,8 @@ const updateUser = async (
 };
 
 const getAllUsers = async () => {
-  const users = await User.find({});
-  const totalUsers = await User.countDocuments();
+  const users = await User.find({ isDeleted: { $ne: true } });
+  const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
 
   return {
     data: users,
@@ -112,17 +112,6 @@ const updateUserStatus = async (userId: string, status: IsActive) => {
     );
   }
 
-  if (
-    (user.isActive === IsActive.INACTIVE ||
-      user.isActive === IsActive.BLOCKED) &&
-    status !== IsActive.ACTIVE
-  ) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      "Inactive/Blocked user can only be activated"
-    );
-  }
-
   user.isActive = status;
   await user.save();
 
@@ -130,9 +119,9 @@ const updateUserStatus = async (userId: string, status: IsActive) => {
 };
 
 const getSingleUser = async (userId: string) => {
-  const user = await User.findById(userId);
+  const user = await User.findOne({ _id: userId, isDeleted: { $ne: true } });
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
+    throw new AppError(httpStatus.NOT_FOUND, "User Not Found or Deleted");
   }
   return user;
 };

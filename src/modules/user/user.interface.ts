@@ -2,7 +2,7 @@ export enum UserRole {
   SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   SENDER = "SENDER",
-  RECIEVER = "RECIEVER",
+  RECEIVER = "RECEIVER",
 }
 
 export enum IsActive {

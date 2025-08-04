@@ -34,8 +34,8 @@ export interface IParcel {
   senderAddress: string;
   receiverAddress: string;
 
-  currentStatus?: ParcelStatus;
-  trackingEvents?: ITrackingEvent[];
+  currentStatus: ParcelStatus;
+  trackingEvents: ITrackingEvent[];
 
   dispatchDate?: Date;
   estimatedDeliveryDate?: Date;
