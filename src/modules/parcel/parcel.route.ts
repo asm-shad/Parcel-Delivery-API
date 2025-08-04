@@ -2,6 +2,8 @@ import { Router } from "express";
 import { ParcelController } from "./parcel.controller";
 import { UserRole } from "../user/user.interface";
 import { checkAuth } from "../../middlewares/checkAuth";
+import { validateRequest } from "../../middlewares/validateRequest";
+import { createParcelZodSchema } from "./parcel.validation";
 
 const router = Router();
 
@@ -9,6 +11,7 @@ const router = Router();
 router.post(
   "/create",
   checkAuth(UserRole.SENDER),
+  validateRequest(createParcelZodSchema),
   ParcelController.createParcel
 );
 
@@ -50,7 +53,6 @@ router.get(
   ParcelController.getParcelDetails
 );
 
-// Okay
 router.patch(
   "/status/:id",
   checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),

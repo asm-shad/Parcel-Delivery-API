@@ -7,7 +7,6 @@ import { JwtPayload } from "jsonwebtoken";
 import { UserRole } from "../user/user.interface";
 
 const createParcel = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
 
   const payload = { ...req.body, sender: user.userId }; // Use user.userId
@@ -22,12 +21,21 @@ const createParcel = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getUserParcels = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
 
-  const parcels = await ParcelService.getParcelsForUser(
+  const convertedQuery: Record<string, any> = {};
+  for (const [key, value] of Object.entries(req.query)) {
+    if (typeof value === "string") {
+      convertedQuery[key] = value;
+    } else if (Array.isArray(value)) {
+      convertedQuery[key] = value.join(",");
+    }
+  }
+
+  const parcels = await ParcelService.getUserParcels(
     user.userId,
-    user.role as UserRole
+    user.role as UserRole,
+    convertedQuery
   );
 
   sendResponse(res, {
@@ -39,7 +47,6 @@ const getUserParcels = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getParcelDetails = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
 
   const parcel = await ParcelService.getSingleParcel(
@@ -57,7 +64,6 @@ const getParcelDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const cancelParcel = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
 
   const parcel = await ParcelService.cancelParcel(req.params.id, user.userId);
@@ -71,7 +77,6 @@ const cancelParcel = catchAsync(async (req: Request, res: Response) => {
 });
 
 const confirmDelivery = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
 
   const parcel = await ParcelService.confirmDelivery(
@@ -88,14 +93,13 @@ const confirmDelivery = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateStatus = catchAsync(async (req: Request, res: Response) => {
-  // Apply booking pattern: cast to JwtPayload first
   const user = req.user as JwtPayload;
   const { status, location, note } = req.body;
 
   const parcel = await ParcelService.updateParcelStatus(
     req.params.id,
     status,
-    user.userId, // Use user.userId
+    user.userId,
     location,
     note
   );
@@ -109,7 +113,6 @@ const updateStatus = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllParcels = catchAsync(async (req: Request, res: Response) => {
-  // Create a new query object with only string values
   const convertedQuery: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(req.query)) {

@@ -48,19 +48,22 @@ const createParcel = async (payload: IParcel): Promise<IParcel> => {
   return await Parcel.create(payload);
 };
 
-const getParcelsForUser = async (
+const getUserParcels = async (
   userId: string,
-  role: UserRole
+  role: UserRole,
+  query: Record<string, any> = {}
 ): Promise<IParcel[]> => {
-  let filter = {};
+  let baseFilter: Record<string, any> = {};
 
   if (role === UserRole.SENDER) {
-    filter = { sender: userId };
+    baseFilter.sender = userId;
   } else if (role === UserRole.RECEIVER) {
-    filter = { receiver: userId };
+    baseFilter.receiver = userId;
   }
 
-  return await Parcel.find(filter).sort("-createdAt");
+  const queryBuilder = new QueryBuilder(Parcel.find(baseFilter), query);
+
+  return await queryBuilder.filter().sort().paginate().build();
 };
 
 const getSingleParcel = async (
@@ -253,7 +256,7 @@ const getTrackingInfo = async (trackingId: string) => {
 
 export const ParcelService = {
   createParcel,
-  getParcelsForUser,
+  getUserParcels,
   getSingleParcel,
   cancelParcel,
   confirmDelivery,

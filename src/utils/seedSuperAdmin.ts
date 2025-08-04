@@ -1,5 +1,10 @@
 import { envVars } from "../config/env";
-import { IAuthProvider, IUser, UserRole } from "../modules/user/user.interface";
+import {
+  IAuthProvider,
+  IsActive,
+  IUser,
+  UserRole,
+} from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
 import bcryptjs from "bcryptjs";
 
@@ -32,6 +37,7 @@ export const seedSuperAdmin = async () => {
       password: hashedPassword,
       isVerified: true,
       auths: [authProvider],
+      isActive: IsActive.ACTIVE,
     };
 
     const superadmin = await User.create(payload);
