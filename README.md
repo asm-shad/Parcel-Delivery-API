@@ -130,16 +130,8 @@ http://localhost:5000/api
 | PATCH  | /parcel/status/:id             | Update parcel status        | Admin, Super Admin  |
 | GET    | /parcel/track/:trackingId      | Track parcel status         | Public              |
 
-graph TD
-    A[Requested] -->|Admin| B[Approved]
-    B -->|Admin| C[Dispatched]
-    C -->|Admin| D[In Transit]
-    D -->|Receiver| E[Delivered]
-    A -->|Sender| F[Cancelled]
-    B -->|Admin| G[Blocked]
-    C -->|Admin| G[Blocked]
-    D -->|Admin| G[Blocked]
-    G -->|Admin| B
+<img width="1570" height="1745" alt="flow_chart" src="https://github.com/user-attachments/assets/d4ceb5ca-3b76-4072-b830-f4a4c2be7dee" />
+
 
 ## Sample API Requests
 ### User Registration
