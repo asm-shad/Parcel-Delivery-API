@@ -56,7 +56,9 @@ const createParcel = (payload) => __awaiter(void 0, void 0, void 0, function* ()
     return yield parcel_model_1.default.create(payload);
 });
 const getUserParcels = (userId_1, role_1, ...args_1) => __awaiter(void 0, [userId_1, role_1, ...args_1], void 0, function* (userId, role, query = {}) {
-    let baseFilter = {};
+    let baseFilter = {
+        currentStatus: { $nin: ["Cancelled", "Delivered"] }, // Exclude these statuses
+    };
     if (role === user_interface_1.UserRole.SENDER) {
         baseFilter.sender = userId;
     }

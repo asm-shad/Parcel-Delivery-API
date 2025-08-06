@@ -53,7 +53,9 @@ const getUserParcels = async (
   role: UserRole,
   query: Record<string, any> = {}
 ): Promise<IParcel[]> => {
-  let baseFilter: Record<string, any> = {};
+  let baseFilter: Record<string, any> = {
+    currentStatus: { $nin: ["Cancelled", "Delivered"] }, // Exclude these statuses
+  };
 
   if (role === UserRole.SENDER) {
     baseFilter.sender = userId;

@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import passport from "passport";
 import expressSession from "express-session";
+import { envVars } from "./config/env";
 
 const app = express();
 
@@ -21,7 +22,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: envVars.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 app.use("/api", router);
 
