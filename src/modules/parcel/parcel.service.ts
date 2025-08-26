@@ -5,7 +5,6 @@ import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 import { Types } from "mongoose";
 import { UserRole } from "../user/user.interface";
-import { User } from "../user/user.model";
 
 // Generate unique tracking ID
 const generateTrackingId = (): string => {
@@ -29,19 +28,6 @@ const createParcel = async (payload: IParcel): Promise<IParcel> => {
     updatedBy: payload.sender,
     note: "Parcel created",
   };
-
-  // ✅ Update sender role if it's RECEIVER (keep it as RECEIVER)
-  const senderUser = await User.findById(payload.sender);
-  if (senderUser?.role === UserRole.RECEIVER) {
-    // No role change needed, stays RECEIVER
-  }
-
-  // ✅ Update receiver role if it's SENDER → change to RECEIVER
-  const receiverUser = await User.findById(payload.receiver);
-  if (receiverUser?.role === UserRole.SENDER) {
-    receiverUser.role = UserRole.RECEIVER;
-    await receiverUser.save();
-  }
 
   payload.trackingEvents = [initialEvent];
 
@@ -93,6 +79,46 @@ const getSingleParcel = async (
   }
 
   return parcel;
+};
+
+const updateParcel = async (
+  parcelId: string,
+  userId: string,
+  updateData: Partial<IParcel>
+): Promise<IParcel> => {
+  const parcel = await Parcel.findById(parcelId);
+
+  if (!parcel) {
+    throw new AppError(httpStatus.NOT_FOUND, "Parcel not found");
+  }
+
+  // Authorization check - only sender can update
+  if (parcel.sender.toString() !== userId) {
+    throw new AppError(
+      httpStatus.FORBIDDEN,
+      "Not authorized to update this parcel"
+    );
+  }
+
+  // Status validation - only allow updates for Requested status
+  if (parcel.currentStatus !== ParcelStatus.Requested) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Can only update parcels with Requested status"
+    );
+  }
+
+  // Update the parcel
+  const updatedParcel = await Parcel.findByIdAndUpdate(parcelId, updateData, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updatedParcel) {
+    throw new AppError(httpStatus.NOT_FOUND, "Parcel not found after update");
+  }
+
+  return updatedParcel;
 };
 
 const cancelParcel = async (
@@ -260,6 +286,7 @@ export const ParcelService = {
   createParcel,
   getUserParcels,
   getSingleParcel,
+  updateParcel,
   cancelParcel,
   confirmDelivery,
   updateParcelStatus,

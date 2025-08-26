@@ -24,7 +24,10 @@ const updateUser = catchAsync(
 
     const verifiedToken = req.user;
 
-    const payload = req.body;
+    const payload = {
+      ...req.body,
+      picture: req.file?.path,
+    };
     const user = await UserServices.updateUser(
       userId,
       payload,

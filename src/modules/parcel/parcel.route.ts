@@ -3,7 +3,11 @@ import { ParcelController } from "./parcel.controller";
 import { UserRole } from "../user/user.interface";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateRequest";
-import { createParcelZodSchema } from "./parcel.validation";
+import {
+  createParcelZodSchema,
+  senderUpdateParcelZodSchema,
+} from "./parcel.validation";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
@@ -11,6 +15,7 @@ const router = Router();
 router.post(
   "/create",
   checkAuth(UserRole.SENDER),
+  multerUpload.array("files"),
   validateRequest(createParcelZodSchema),
   ParcelController.createParcel
 );
@@ -19,6 +24,14 @@ router.get(
   "/my-parcels",
   checkAuth(UserRole.SENDER),
   ParcelController.getUserParcels
+);
+
+router.patch(
+  "/update/:id",
+  checkAuth(UserRole.SENDER),
+  multerUpload.array("files"), // Optional: if you want to allow image updates
+  validateRequest(senderUpdateParcelZodSchema), // Use your existing update schema
+  ParcelController.updateParcel
 );
 
 router.patch(

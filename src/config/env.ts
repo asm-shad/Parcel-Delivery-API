@@ -65,7 +65,6 @@ const loadEnvVariables = (): EnvConfig => {
     "REDIS_PORT",
     "REDIS_USERNAME",
     "REDIS_PASSWORD",
-    "SSL_IPN_URL",
   ];
 
   requiredEnvVariables.forEach((key) => {

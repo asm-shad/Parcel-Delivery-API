@@ -5,11 +5,16 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
 import { UserRole } from "../user/user.interface";
+import { IParcel } from "./parcel.interface";
 
 const createParcel = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
 
-  const payload = { ...req.body, sender: user.userId }; // Use user.userId
+  const payload: IParcel = {
+    ...req.body,
+    sender: user.userId,
+    images: (req.files as Express.Multer.File[])?.map((file) => file.path),
+  }; // Use user.userId
   const parcel = await ParcelService.createParcel(payload);
 
   sendResponse(res, {
@@ -60,6 +65,34 @@ const getParcelDetails = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     message: "Parcel details retrieved",
     data: parcel,
+  });
+});
+
+const updateParcel = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user as JwtPayload;
+
+  const updateData: Partial<IParcel> = {
+    ...req.body,
+  };
+
+  // If files are uploaded, add URLs to images array
+  if (req.files && Array.isArray(req.files)) {
+    updateData.images = (req.files as Express.Multer.File[]).map(
+      (file) => file.path // or file.location depending on multer/cloudinary setup
+    );
+  }
+
+  const updatedParcel = await ParcelService.updateParcel(
+    req.params.id,
+    user.userId,
+    updateData
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Parcel updated successfully",
+    data: updatedParcel,
   });
 });
 
@@ -151,6 +184,7 @@ export const ParcelController = {
   createParcel,
   getUserParcels,
   getParcelDetails,
+  updateParcel,
   cancelParcel,
   confirmDelivery,
   updateStatus,

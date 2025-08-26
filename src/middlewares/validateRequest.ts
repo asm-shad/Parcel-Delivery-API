@@ -5,14 +5,12 @@ export const validateRequest =
   (zodSchema: AnyZodObject) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // sanitize data
+      if (req.body.data) {
+        req.body = JSON.parse(req.body.data);
+      }
       req.body = await zodSchema.parseAsync(req.body);
-
-      console.log(req.body);
-
       next();
-    } catch (err) {
-      console.log(err);
-      next(err);
+    } catch (error) {
+      next(error);
     }
   };

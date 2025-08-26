@@ -18,8 +18,9 @@ const parcel_service_1 = require("./parcel.service");
 const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const createParcel = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     const user = req.user;
-    const payload = Object.assign(Object.assign({}, req.body), { sender: user.userId }); // Use user.userId
+    const payload = Object.assign(Object.assign({}, req.body), { sender: user.userId, images: (_a = req.files) === null || _a === void 0 ? void 0 : _a.map((file) => file.path) }); // Use user.userId
     const parcel = yield parcel_service_1.ParcelService.createParcel(payload);
     (0, sendResponse_1.sendResponse)(res, {
         success: true,

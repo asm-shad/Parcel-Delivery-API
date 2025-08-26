@@ -20,7 +20,6 @@ const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const mongoose_1 = require("mongoose");
 const user_interface_1 = require("../user/user.interface");
-const user_model_1 = require("../user/user.model");
 // Generate unique tracking ID
 const generateTrackingId = () => {
     const now = new Date();
@@ -41,17 +40,6 @@ const createParcel = (payload) => __awaiter(void 0, void 0, void 0, function* ()
         updatedBy: payload.sender,
         note: "Parcel created",
     };
-    // ✅ Update sender role if it's RECEIVER (keep it as RECEIVER)
-    const senderUser = yield user_model_1.User.findById(payload.sender);
-    if ((senderUser === null || senderUser === void 0 ? void 0 : senderUser.role) === user_interface_1.UserRole.RECEIVER) {
-        // No role change needed, stays RECEIVER
-    }
-    // ✅ Update receiver role if it's SENDER → change to RECEIVER
-    const receiverUser = yield user_model_1.User.findById(payload.receiver);
-    if ((receiverUser === null || receiverUser === void 0 ? void 0 : receiverUser.role) === user_interface_1.UserRole.SENDER) {
-        receiverUser.role = user_interface_1.UserRole.RECEIVER;
-        yield receiverUser.save();
-    }
     payload.trackingEvents = [initialEvent];
     return yield parcel_model_1.default.create(payload);
 });

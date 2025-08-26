@@ -7,9 +7,10 @@ const user_interface_1 = require("../user/user.interface");
 const checkAuth_1 = require("../../middlewares/checkAuth");
 const validateRequest_1 = require("../../middlewares/validateRequest");
 const parcel_validation_1 = require("./parcel.validation");
+const multer_config_1 = require("../../config/multer.config");
 const router = (0, express_1.Router)();
 // Sender routes
-router.post("/create", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), (0, validateRequest_1.validateRequest)(parcel_validation_1.createParcelZodSchema), parcel_controller_1.ParcelController.createParcel);
+router.post("/create", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), multer_config_1.multerUpload.array("files"), (0, validateRequest_1.validateRequest)(parcel_validation_1.createParcelZodSchema), parcel_controller_1.ParcelController.createParcel);
 router.get("/my-parcels", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), parcel_controller_1.ParcelController.getUserParcels);
 router.patch("/cancel/:id", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), parcel_controller_1.ParcelController.cancelParcel);
 // Receiver routes

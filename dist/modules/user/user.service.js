@@ -49,32 +49,41 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
     if (!isUserExist) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User Not Found");
     }
-    if (payload.role) {
+    // 🔒 Role update restrictions
+    if (payload.role !== undefined) {
         if (decodedToken.role === user_interface_1.UserRole.SENDER ||
             decodedToken.role === user_interface_1.UserRole.RECEIVER) {
-            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized");
+            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized to update role");
         }
         if (payload.role === user_interface_1.UserRole.SUPER_ADMIN &&
             decodedToken.role === user_interface_1.UserRole.ADMIN) {
-            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized");
+            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "Admins cannot promote to Super Admin");
         }
     }
-    if (payload.isActive || payload.isDeleted || payload.isVerified) {
-        if (decodedToken.role === user_interface_1.UserRole.SENDER ||
-            decodedToken.role === user_interface_1.UserRole.RECEIVER) {
-            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You are not authorized");
+    // 🔒 Restricted flags (only admins/superadmins can change)
+    const restrictedFields = [
+        "isActive",
+        "isDeleted",
+        "isVerified",
+    ];
+    for (const field of restrictedFields) {
+        if (payload[field] !== undefined) {
+            if (decodedToken.role === user_interface_1.UserRole.SENDER ||
+                decodedToken.role === user_interface_1.UserRole.RECEIVER) {
+                throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, `You are not authorized to update ${field}`);
+            }
         }
     }
+    // 🔑 Password hash if provided
     if (payload.password) {
-        if (payload.password) {
-            payload.password = yield bcryptjs_1.default.hash(payload.password, env_1.envVars.BCRYPT_SALT_ROUND);
-        }
+        payload.password = yield bcryptjs_1.default.hash(payload.password, env_1.envVars.BCRYPT_SALT_ROUND);
     }
-    const newUpdatedUser = yield user_model_1.User.findByIdAndUpdate(userId, payload, {
+    // ✅ Update user
+    const updatedUser = yield user_model_1.User.findByIdAndUpdate(userId, payload, {
         new: true,
         runValidators: true,
     });
-    return newUpdatedUser;
+    return updatedUser;
 });
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield user_model_1.User.find({ isDeleted: { $ne: true } });

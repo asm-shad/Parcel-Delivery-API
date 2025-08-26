@@ -45,45 +45,64 @@ const updateUser = async (
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
   }
 
-  if (payload.role) {
+  // 🔒 Role update restrictions
+  if (payload.role !== undefined) {
     if (
       decodedToken.role === UserRole.SENDER ||
       decodedToken.role === UserRole.RECEIVER
     ) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "You are not authorized to update role"
+      );
     }
 
     if (
       payload.role === UserRole.SUPER_ADMIN &&
       decodedToken.role === UserRole.ADMIN
     ) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
-  }
-  if (payload.isActive || payload.isDeleted || payload.isVerified) {
-    if (
-      decodedToken.role === UserRole.SENDER ||
-      decodedToken.role === UserRole.RECEIVER
-    ) {
-      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
-    }
-  }
-
-  if (payload.password) {
-    if (payload.password) {
-      payload.password = await bcryptjs.hash(
-        payload.password,
-        envVars.BCRYPT_SALT_ROUND
+      throw new AppError(
+        httpStatus.FORBIDDEN,
+        "Admins cannot promote to Super Admin"
       );
     }
   }
 
-  const newUpdatedUser = await User.findByIdAndUpdate(userId, payload, {
+  // 🔒 Restricted flags (only admins/superadmins can change)
+  const restrictedFields: (keyof IUser)[] = [
+    "isActive",
+    "isDeleted",
+    "isVerified",
+  ];
+  for (const field of restrictedFields) {
+    if (payload[field] !== undefined) {
+      if (
+        decodedToken.role === UserRole.SENDER ||
+        decodedToken.role === UserRole.RECEIVER
+      ) {
+        throw new AppError(
+          httpStatus.FORBIDDEN,
+          `You are not authorized to update ${field}`
+        );
+      }
+    }
+  }
+
+  // 🔑 Password hash if provided
+  if (payload.password) {
+    payload.password = await bcryptjs.hash(
+      payload.password,
+      envVars.BCRYPT_SALT_ROUND
+    );
+  }
+
+  // ✅ Update user
+  const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
   });
 
-  return newUpdatedUser;
+  return updatedUser;
 };
 
 const getAllUsers = async () => {
