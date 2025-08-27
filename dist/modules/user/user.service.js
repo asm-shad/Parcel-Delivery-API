@@ -30,6 +30,7 @@ const user_model_1 = require("./user.model");
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const env_1 = require("../../config/env");
+const cloudinary_config_1 = require("../../config/cloudinary.config");
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = payload, rest = __rest(payload, ["email", "password"]);
     const isUserExist = yield user_model_1.User.findOne({ email });
@@ -49,7 +50,6 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
     if (!isUserExist) {
         throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User Not Found");
     }
-    // 🔒 Role update restrictions
     if (payload.role !== undefined) {
         if (decodedToken.role === user_interface_1.UserRole.SENDER ||
             decodedToken.role === user_interface_1.UserRole.RECEIVER) {
@@ -78,11 +78,13 @@ const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, 
     if (payload.password) {
         payload.password = yield bcryptjs_1.default.hash(payload.password, env_1.envVars.BCRYPT_SALT_ROUND);
     }
-    // ✅ Update user
     const updatedUser = yield user_model_1.User.findByIdAndUpdate(userId, payload, {
         new: true,
         runValidators: true,
     });
+    if (payload.picture && isUserExist.picture) {
+        yield (0, cloudinary_config_1.deleteImageFromCLoudinary)(isUserExist.picture);
+    }
     return updatedUser;
 });
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {

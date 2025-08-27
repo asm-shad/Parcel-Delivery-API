@@ -5,6 +5,7 @@ import AppError from "../../errorHelpers/AppError";
 import httpStatus from "http-status-codes";
 import { Types } from "mongoose";
 import { UserRole } from "../user/user.interface";
+import { deleteImageFromCLoudinary } from "../../config/cloudinary.config";
 
 // Generate unique tracking ID
 const generateTrackingId = (): string => {
@@ -84,7 +85,7 @@ const getSingleParcel = async (
 const updateParcel = async (
   parcelId: string,
   userId: string,
-  updateData: Partial<IParcel>
+  updateData: Partial<IParcel> & { deleteImages?: string[] }
 ): Promise<IParcel> => {
   const parcel = await Parcel.findById(parcelId);
 
@@ -108,14 +109,50 @@ const updateParcel = async (
     );
   }
 
-  // Update the parcel
-  const updatedParcel = await Parcel.findByIdAndUpdate(parcelId, updateData, {
-    new: true,
-    runValidators: true,
-  });
+  // --- Handle Images ---
+  let updatedImages = parcel.images || [];
+
+  // Append new images if provided
+  if (updateData.images && updateData.images.length > 0) {
+    updatedImages = [...updatedImages, ...updateData.images];
+  }
+
+  // Handle deletions
+  if (updateData.deleteImages && updateData.deleteImages.length > 0) {
+    updatedImages = updatedImages.filter(
+      (url) => !updateData.deleteImages?.includes(url)
+    );
+  }
+
+  // Build final update payload (exclude deleteImages)
+  const { deleteImages, ...restUpdateData } = updateData;
+  restUpdateData.images = updatedImages;
+
+  // Update DB
+  const updatedParcel = await Parcel.findByIdAndUpdate(
+    parcelId,
+    restUpdateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
 
   if (!updatedParcel) {
     throw new AppError(httpStatus.NOT_FOUND, "Parcel not found after update");
+  }
+
+  // --- Delete removed images from Cloudinary ---
+  if (deleteImages && deleteImages.length > 0) {
+    await Promise.all(
+      deleteImages.map(async (url) => {
+        try {
+          await deleteImageFromCLoudinary(url);
+        } catch (err) {
+          console.error("Failed to delete from Cloudinary:", url, err);
+        }
+      })
+    );
   }
 
   return updatedParcel;

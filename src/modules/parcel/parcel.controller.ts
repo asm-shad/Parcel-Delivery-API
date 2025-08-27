@@ -71,15 +71,31 @@ const getParcelDetails = catchAsync(async (req: Request, res: Response) => {
 const updateParcel = catchAsync(async (req: Request, res: Response) => {
   const user = req.user as JwtPayload;
 
-  const updateData: Partial<IParcel> = {
+  // Copy body into updateData
+  const updateData: Partial<IParcel> & { deleteImages?: string[] } = {
     ...req.body,
   };
 
-  // If files are uploaded, add URLs to images array
+  // Convert deleteImages to an array (handle string or JSON)
+  if (req.body.deleteImages) {
+    try {
+      // Support both array and stringified JSON
+      updateData.deleteImages = Array.isArray(req.body.deleteImages)
+        ? req.body.deleteImages
+        : JSON.parse(req.body.deleteImages);
+    } catch {
+      updateData.deleteImages = [req.body.deleteImages];
+    }
+  }
+
+  // Handle new uploaded files (Cloudinary URLs)
   if (req.files && Array.isArray(req.files)) {
-    updateData.images = (req.files as Express.Multer.File[]).map(
-      (file) => file.path // or file.location depending on multer/cloudinary setup
+    const uploadedImages = (req.files as Express.Multer.File[]).map(
+      (file) => file.path // CloudinaryStorage sets .path to URL
     );
+
+    // Merge with body.images if provided
+    updateData.images = [...(updateData.images || []), ...uploadedImages];
   }
 
   const updatedParcel = await ParcelService.updateParcel(

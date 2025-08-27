@@ -58,6 +58,37 @@ const getParcelDetails = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(vo
         data: parcel,
     });
 }));
+const updateParcel = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = req.user;
+    // Copy body into updateData
+    const updateData = Object.assign({}, req.body);
+    // Convert deleteImages to an array (handle string or JSON)
+    if (req.body.deleteImages) {
+        try {
+            // Support both array and stringified JSON
+            updateData.deleteImages = Array.isArray(req.body.deleteImages)
+                ? req.body.deleteImages
+                : JSON.parse(req.body.deleteImages);
+        }
+        catch (_a) {
+            updateData.deleteImages = [req.body.deleteImages];
+        }
+    }
+    // Handle new uploaded files (Cloudinary URLs)
+    if (req.files && Array.isArray(req.files)) {
+        const uploadedImages = req.files.map((file) => file.path // CloudinaryStorage sets .path to URL
+        );
+        // Merge with body.images if provided
+        updateData.images = [...(updateData.images || []), ...uploadedImages];
+    }
+    const updatedParcel = yield parcel_service_1.ParcelService.updateParcel(req.params.id, user.userId, updateData);
+    (0, sendResponse_1.sendResponse)(res, {
+        success: true,
+        statusCode: http_status_codes_1.default.OK,
+        message: "Parcel updated successfully",
+        data: updatedParcel,
+    });
+}));
 const cancelParcel = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = req.user;
     const parcel = yield parcel_service_1.ParcelService.cancelParcel(req.params.id, user.userId);
@@ -121,6 +152,7 @@ exports.ParcelController = {
     createParcel,
     getUserParcels,
     getParcelDetails,
+    updateParcel,
     cancelParcel,
     confirmDelivery,
     updateStatus,

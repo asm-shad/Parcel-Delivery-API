@@ -12,6 +12,9 @@ const router = (0, express_1.Router)();
 // Sender routes
 router.post("/create", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), multer_config_1.multerUpload.array("files"), (0, validateRequest_1.validateRequest)(parcel_validation_1.createParcelZodSchema), parcel_controller_1.ParcelController.createParcel);
 router.get("/my-parcels", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), parcel_controller_1.ParcelController.getUserParcels);
+router.patch("/update/:id", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), multer_config_1.multerUpload.array("files"), // Optional: if you want to allow image updates
+(0, validateRequest_1.validateRequest)(parcel_validation_1.senderUpdateParcelZodSchema), // Use your existing update schema
+parcel_controller_1.ParcelController.updateParcel);
 router.patch("/cancel/:id", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.SENDER), parcel_controller_1.ParcelController.cancelParcel);
 // Receiver routes
 router.get("/incoming-parcels", (0, checkAuth_1.checkAuth)(user_interface_1.UserRole.RECEIVER), parcel_controller_1.ParcelController.getUserParcels);

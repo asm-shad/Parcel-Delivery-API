@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateParcelZodSchema = exports.createParcelZodSchema = void 0;
+exports.senderUpdateParcelZodSchemaForMiddleware = exports.senderUpdateParcelZodSchemaRefined = exports.senderUpdateParcelZodSchema = exports.createParcelZodSchema = void 0;
 const zod_1 = __importDefault(require("zod"));
 exports.createParcelZodSchema = zod_1.default.object({
     title: zod_1.default
@@ -38,8 +38,7 @@ exports.createParcelZodSchema = zod_1.default.object({
         .min(5, { message: "Receiver address must be at least 5 characters long." })
         .max(200, { message: "Receiver address cannot exceed 200 characters." }),
 });
-exports.updateParcelZodSchema = zod_1.default
-    .object({
+exports.senderUpdateParcelZodSchema = zod_1.default.object({
     title: zod_1.default
         .string({ invalid_type_error: "Title must be a string" })
         .min(3, { message: "Title must be at least 3 characters long." })
@@ -63,10 +62,6 @@ exports.updateParcelZodSchema = zod_1.default
         .positive({ message: "Weight must be a positive number." })
         .max(100, { message: "Weight cannot exceed 100kg." })
         .optional(),
-    fee: zod_1.default
-        .number({ invalid_type_error: "Fee must be a number" })
-        .positive({ message: "Fee must be a positive number." })
-        .optional(),
     receiverAddress: zod_1.default
         .string({ invalid_type_error: "Receiver address must be a string" })
         .min(5, {
@@ -74,7 +69,11 @@ exports.updateParcelZodSchema = zod_1.default
     })
         .max(200, { message: "Receiver address cannot exceed 200 characters." })
         .optional(),
-})
-    .refine((data) => Object.keys(data).length > 0, {
+    deleteImages: zod_1.default.array(zod_1.default.string).optional(),
+});
+// Create a refined version for runtime validation
+exports.senderUpdateParcelZodSchemaRefined = exports.senderUpdateParcelZodSchema.refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided for update",
 });
+// Create a version without refinement for middleware (ZodObject)
+exports.senderUpdateParcelZodSchemaForMiddleware = exports.senderUpdateParcelZodSchema;

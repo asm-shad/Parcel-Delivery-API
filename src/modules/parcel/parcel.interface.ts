@@ -47,4 +47,5 @@ export interface IParcel {
 
   createdAt?: Date;
   updatedAt?: Date;
+  deleteImages?: string[];
 }

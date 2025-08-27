@@ -78,6 +78,8 @@ export const senderUpdateParcelZodSchema = z.object({
     })
     .max(200, { message: "Receiver address cannot exceed 200 characters." })
     .optional(),
+
+  deleteImages: z.array(z.string).optional(),
 });
 
 // Create a refined version for runtime validation

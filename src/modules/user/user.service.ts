@@ -5,6 +5,7 @@ import httpStatus from "http-status-codes";
 import bcryptjs from "bcryptjs";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { deleteImageFromCLoudinary } from "../../config/cloudinary.config";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -45,7 +46,6 @@ const updateUser = async (
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found");
   }
 
-  // 🔒 Role update restrictions
   if (payload.role !== undefined) {
     if (
       decodedToken.role === UserRole.SENDER ||
@@ -96,11 +96,14 @@ const updateUser = async (
     );
   }
 
-  // ✅ Update user
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
   });
+
+  if (payload.picture && isUserExist.picture) {
+    await deleteImageFromCLoudinary(isUserExist.picture);
+  }
 
   return updatedUser;
 };
