@@ -6,6 +6,8 @@ import bcryptjs from "bcryptjs";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 import { deleteImageFromCLoudinary } from "../../config/cloudinary.config";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import { userSearchableFields } from "./user.constant";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -108,15 +110,23 @@ const updateUser = async (
   return updatedUser;
 };
 
-const getAllUsers = async () => {
-  const users = await User.find({ isDeleted: { $ne: true } });
-  const totalUsers = await User.countDocuments({ isDeleted: { $ne: true } });
+const getAllUsers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
+  const usersData = queryBuilder
+    .filter()
+    .search(userSearchableFields)
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    usersData.build(),
+    queryBuilder.getMeta(),
+  ]);
 
   return {
-    data: users,
-    meta: {
-      total: totalUsers,
-    },
+    data,
+    meta,
   };
 };
 
@@ -141,11 +151,21 @@ const updateUserStatus = async (userId: string, status: IsActive) => {
 };
 
 const getSingleUser = async (userId: string) => {
-  const user = await User.findOne({ _id: userId, isDeleted: { $ne: true } });
+  const user = await User.findOne({
+    _id: userId,
+    isDeleted: { $ne: true },
+  }).select("-password");
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User Not Found or Deleted");
   }
   return user;
+};
+
+const getMe = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
+  return {
+    data: user,
+  };
 };
 
 const deleteUser = async (userId: string) => {
@@ -170,4 +190,5 @@ export const UserServices = {
   updateUserStatus,
   getSingleUser,
   deleteUser,
+  getMe,
 };

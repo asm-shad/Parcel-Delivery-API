@@ -20,6 +20,8 @@ router.get(
   UserControllers.getAllUsers
 );
 
+router.get("/me", checkAuth(...Object.values(UserRole)), UserControllers.getMe);
+
 router.patch(
   "/:id",
   checkAuth(...Object.values(UserRole)),
