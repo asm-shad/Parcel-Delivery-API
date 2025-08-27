@@ -38,7 +38,7 @@ router.patch(
 
 router.get(
   "/:id",
-  checkAuth(...Object.values(UserRole)),
+  checkAuth(UserRole.ADMIN, UserRole.SUPER_ADMIN),
   UserControllers.getSingleUser
 );
 

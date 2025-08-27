@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { envVars } from "./config/env";
 import app from "./app";
 import { seedSuperAdmin } from "./utils/seedSuperAdmin";
+import { connectRedis } from "./config/redis.config";
 
 let server: Server;
 
@@ -20,8 +21,8 @@ const startServer = async () => {
 };
 
 (async () => {
+  await connectRedis();
   await startServer();
-  // When server runs if super admin doesn't exist in db a super admin created by itself
   await seedSuperAdmin();
 })();
 

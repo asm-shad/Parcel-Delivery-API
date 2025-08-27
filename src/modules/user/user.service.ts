@@ -90,14 +90,6 @@ const updateUser = async (
     }
   }
 
-  // 🔑 Password hash if provided
-  if (payload.password) {
-    payload.password = await bcryptjs.hash(
-      payload.password,
-      envVars.BCRYPT_SALT_ROUND
-    );
-  }
-
   const updatedUser = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
